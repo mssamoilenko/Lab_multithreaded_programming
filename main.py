@@ -1,4 +1,6 @@
 import threading
+import random
+import time
 from statistics import mean
 #task1
 numbers = []
@@ -134,3 +136,38 @@ def main():
     print("Search completed.")
 
 main()
+
+#HW
+#task1HW
+numbers = []
+list_filled = threading.Event()
+
+def fill_list():
+    global numbers
+    for _ in range(10):
+        numbers.append(random.randint(1, 100))
+        time.sleep(0.5)
+    list_filled.set()
+
+def calculate_sum():
+    list_filled.wait()
+    total_sum = sum(numbers)
+    print(f"Сумма елементів списку: {total_sum}")
+def calculate_average():
+    list_filled.wait()
+    average = mean(numbers)
+    print(f"Середнє арифметичне: {average}")
+
+thread1 = threading.Thread(target=fill_list)
+thread2 = threading.Thread(target=calculate_sum)
+thread3 = threading.Thread(target=calculate_average)
+
+thread1.start()
+thread2.start()
+thread3.start()
+
+thread1.join()
+thread2.join()
+thread3.join()
+
+print(f"Заповнений список: {numbers}")
