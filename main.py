@@ -316,8 +316,7 @@ main()
 #task4HW
 def find_files_with_word(src_dir, search_word, output_file):
     try:
-        files = [file for file in os.listdir(src_dir) if file.endswith(".txt")]
-
+        files = [file for file in src_dir if file.endswith(".txt")]
         with open(output_file, "w", encoding="utf-8") as out_file:
             for file in files:
                 file_path = f"{src_dir}/{file}"
