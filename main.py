@@ -171,3 +171,69 @@ thread2.join()
 thread3.join()
 
 print(f"Заповнений список: {numbers}")
+
+#task2HW
+
+primes_file = "primes.txt"
+factorials_file = "factorials.txt"
+file_filled = threading.Event()
+
+def fill_file(path):
+    with open(path, 'w') as f:
+        for _ in range(10):
+            f.write(f"{random.randint(1, 100)}\n")
+            time.sleep(0.5)
+    file_filled.set()
+
+def find_primes(path):
+    file_filled.wait()
+    with open(path, 'r') as f:
+        numbers = [int(line.strip()) for line in f]
+
+    primes = [num for num in numbers if is_prime(num)]
+
+    with open(primes_file, 'w') as f:
+        for prime in primes:
+            f.write(f"{prime}\n")
+
+    print(f"Знайдені прості числа: {primes}")
+
+def is_prime(n):
+    if n <= 1:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+def calculate_factorials(path):
+    file_filled.wait()
+    with open(path, 'r') as f:
+        numbers = [int(line.strip()) for line in f]
+
+    factorials = [factorial(num) for num in numbers]
+
+    with open(factorials_file, 'w') as f:
+        for fact in factorials:
+            f.write(f"{fact}\n")
+
+    print(f"Факторіали: {factorials}")
+
+def factorial(n):
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+
+file_path = input("Enter the file path: ")
+
+thread1 = threading.Thread(target=fill_file, args=(file_path,))
+thread2 = threading.Thread(target=find_primes, args=(file_path,))
+thread3 = threading.Thread(target=calculate_factorials, args=(file_path,))
+
+thread1.start()
+thread2.start()
+thread3.start()
+
+thread1.join()
+thread2.join()
+thread3.join()
