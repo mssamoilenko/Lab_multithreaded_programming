@@ -237,3 +237,131 @@ thread3.start()
 thread1.join()
 thread2.join()
 thread3.join()
+
+#task3HW
+def fill_file_with_numbers(file_path):
+    try:
+        with open(file_path, "w") as f:
+            for _ in range(100):
+                f.write(f"{random.randint(1, 100)}\n")
+        print(f"Файл {file_path} заповнений.")
+    except Exception as e:
+        print(f"Помилка: {e}")
+
+def find_prime_numbers(file_path, event):
+    try:
+        with open(file_path, "r") as f:
+            numbers = [int(line.strip()) for line in f.readlines()]
+
+        primes = [n for n in numbers if is_prime(n)]
+
+        with open("prime_numbers.txt", "w") as out_file:
+            for prime in primes:
+                out_file.write(f"{prime}\n")
+
+        print(f"Прості числа записані в prime_numbers.txt.")
+        event.set()
+    except Exception as e:
+        print(f"Помилка: {e}")
+
+def find_factorial_numbers(file_path, event):
+    try:
+        event.wait()
+        with open(file_path, "r") as f:
+            numbers = [int(line.strip()) for line in f.readlines()]
+
+        factorials = [factorial(n) for n in numbers]
+
+        with open("factorial_numbers.txt", "w") as out_file:
+            for fact in factorials:
+                out_file.write(f"{fact}\n")
+
+        print(f"Факториали записані в factorial_numbers.txt.")
+    except Exception as e:
+        print(f"Помилка: {e}")
+
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+def factorial(n):
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+def main():
+    file_path = input("Введіть шлях до файлу: ")
+
+    fill_thread = threading.Thread(target=fill_file_with_numbers, args=(file_path,))
+    prime_thread = threading.Thread(target=find_prime_numbers, args=(file_path, file_filled))
+    factorial_thread = threading.Thread(target=find_factorial_numbers, args=(file_path, file_filled))
+
+    fill_thread.start()
+    prime_thread.start()
+    factorial_thread.start()
+
+    fill_thread.join()
+    prime_thread.join()
+    factorial_thread.join()
+
+    print("Операції завершені.")
+
+main()
+
+#task4HW
+def find_files_with_word(src_dir, search_word, output_file):
+    try:
+        files = [file for file in os.listdir(src_dir) if file.endswith(".txt")]
+
+        with open(output_file, "w", encoding="utf-8") as out_file:
+            for file in files:
+                file_path = f"{src_dir}/{file}"
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    if search_word in content:
+                        out_file.write(content + "\n")
+        print(f"Файли з словом '{search_word}' злиті в {output_file}")
+    except Exception as e:
+        print(f"Помилка при пошуку: {e}")
+
+def remove_prohibited_words(output_file, banned_words_file):
+    try:
+        with open(banned_words_file, "r", encoding="utf-8") as banned_file:
+            banned_words = set(banned_file.read().splitlines())
+
+        with open(output_file, "r", encoding="utf-8") as in_file:
+            content = in_file.read()
+
+        for word in banned_words:
+            content = content.replace(word, "")
+
+        with open(output_file, "w", encoding="utf-8") as out_file:
+            out_file.write(content)
+
+        print(f"Заборонені слова видалені з {output_file}")
+    except Exception as e:
+        print(f"Помилка при видаленні заборонених слів: {e}")
+
+def main():
+    src_dir = input("Введіть шлях до директорії: ")
+    search_word = input("Введіть слово для пошуку: ")
+    output_file = "merged_output.txt"
+    banned_words_file = input("Введіть шлях до файлу з забороненими словами: ")
+
+    search_thread = threading.Thread(target=find_files_with_word, args=(src_dir, search_word, output_file))
+    remove_thread = threading.Thread(target=remove_prohibited_words, args=(output_file, banned_words_file))
+
+    search_thread.start()
+    search_thread.join()
+
+    remove_thread.start()
+    remove_thread.join()
+
+    print("Статистика: Пошук і обробка файлів завершено.")
+
+main()
